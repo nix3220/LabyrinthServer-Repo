@@ -1,0 +1,20 @@
+{
+  "name": "labyrinthserver-repo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nix3220/LabyrinthServer-Repo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nix3220/LabyrinthServer-Repo/issues"
+  },
+  "homepage": "https://github.com/nix3220/LabyrinthServer-Repo#readme"
+}
