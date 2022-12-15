@@ -5,6 +5,8 @@ const { runInThisContext } = require('vm');
 
 var boardPath = 'data/boards/';
 var leaderboardPath = 'data/leaderboard/';
+var timedBoardsPath = 'data/timed/'
+var timedBoardsPathWithName = timedBoardsPath+'TimedBoards.json';
 var leaderBoardPathWithName = leaderboardPath+"leaderboard.json";
 class Vector2 {
     constructor(x, y){
@@ -14,7 +16,7 @@ class Vector2 {
 }
 
 class BoardData {
-    constructor(uniqueID, date, boardName,
+    constructor(author, uniqueID, date, boardName,
         tileTypes,
         rotDirs,
         goalPositions,
@@ -24,6 +26,7 @@ class BoardData {
         placementTTYPE,
         placementRDIR,
         powerupSpawnRate) {
+            this.author = author
             this.uniqueID = uniqueID
             this.date = date;
             this.boardName = boardName
@@ -38,6 +41,14 @@ class BoardData {
             this.powerupSpawnRate = powerupSpawnRate
     }
      
+}
+
+class TimedBoards{
+    constructor(numDaysChecked, dailyBoard, weeklyBoard){
+        this.numDaysChecked = numDaysChecked;
+        this.dailyBoard = dailyBoard
+        this.weeklyBoard = weeklyBoard
+    }
 }
 
 class BoardCollection{
@@ -62,6 +73,25 @@ class LeaderBoardEntry{
 var boardDictionary = new Map();
 
 var leaderBoardDictionary = new Map();
+
+var TimedBoards = ReadTimedBoards();
+
+function ReadTimedBoards()
+{
+    fs.readFileSync(timedBoardsPathWithName, (data) => {
+        return JSON.parse(data);
+    });
+}
+
+var minutes = 1;
+
+var timerID = setInterval(function() {
+    CheckDailyAndWeeklyBoards();
+}, (minutes*60) * 1000);
+
+function CheckDailyAndWeeklyBoards(){
+    
+}
 
 function checkPaths(){
     if(!fs.existsSync(boardPath)){
@@ -130,7 +160,16 @@ var server = http.createServer(function (req, res){
         res.write(JSON.stringify(collection));  
         res.end();
     }
-    if(req.url == '/testSend'){
+    if(req.url.includes('/getBoard')){
+        var boardId = req.url.split("/")[2];
+        var board = boardDictionary.get(boardId);
+        if(board){
+            res.writeHead(200, {'Content-Type': 'application/json'});
+            res.write(JSON.stringify(board));  
+            res.end();
+        }
+    }
+    if(req.url == '/sendBoard'){
         let body = [];
         let json = "";
         req.on('data', (chunk) => {
@@ -161,6 +200,10 @@ var server = http.createServer(function (req, res){
     if(req.url.includes('/getLeaderboard')){
         var boardId = req.url.split("/")[2];
         var boardLeaderboard = leaderBoardDictionary.get(boardId);
+        if(!boardLeaderboard){
+            leaderBoardDictionary.set(boardId, new LeaderBoard())
+            var boardLeaderboard = leaderBoardDictionary.get(boardId);
+        }
         var values = Array.from(boardLeaderboard.elements.values());
         var returnObj = {"leaderBoardEntries": values};
         console.log(returnObj);
@@ -234,7 +277,7 @@ function getTestBoard(){
     var tileTypes = [1,2,1,0,1,2,1,1,2]
     var rotDirs = [1,2,3,1,2,3,1,2,3]
     var goalPositions = [new Vector2(0,0), new Vector2(1,1)]
-    board = new BoardData(makeid(), formattedDate(), "Test", tileTypes, rotDirs, goalPositions, 2, 1, 1, 2, 3, 100);
+    board = new BoardData("TestAuthor", makeid(), formattedDate(), "Test", tileTypes, rotDirs, goalPositions, 2, 1, 1, 2, 3, 100);
     return board;
 }
 
@@ -260,7 +303,7 @@ function generateRandomBoard(name){
     }
 
     
-    board = new BoardData(makeid(), formattedDate(), name, tileTypes, rotDirs, goalPositions, goalAmt, 1, 1, Math.round(Math.random()*2), Math.round(Math.random()*3), 0);
+    board = new BoardData("TestAuthor",makeid(), formattedDate(), name, tileTypes, rotDirs, goalPositions, goalAmt, 1, 1, Math.round(Math.random()*2), Math.round(Math.random()*3), 0);
     return board;
 }
 
