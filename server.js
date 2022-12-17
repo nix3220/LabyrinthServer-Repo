@@ -1,6 +1,8 @@
 const { appendFile } = require('fs');
 var http = require('http');
 const fs = require('fs');
+const moment = require('moment');
+moment().format();
 const { runInThisContext } = require('vm');
 
 var boardPath = 'data/boards/';
@@ -74,23 +76,44 @@ var boardDictionary = new Map();
 
 var leaderBoardDictionary = new Map();
 
-var TimedBoards = ReadTimedBoards();
+var timedBoards;
+var runner = ReadTimedBoards()
 
 function ReadTimedBoards()
 {
-    fs.readFileSync(timedBoardsPathWithName, (data) => {
-        return JSON.parse(data);
-    });
+    var data = fs.readFileSync(timedBoardsPathWithName)
+    var obj = JSON.parse(data);
+    console.log("Parsed");
+    console.log(obj);
+    if(data == "[]"){
+        obj = new TimedBoards(0, generateRandomBoard("Server", "Daily Board"), generateRandomBoard("Server", "Weekly Board"));
+        console.log("Writing new boards");
+        fs.writeFileSync(timedBoardsPathWithName, JSON.stringify(obj, null, 2));
+    }
+    timedBoards = obj;
 }
 
 var minutes = 1;
+var t = boardTimer()
 
-var timerID = setInterval(function() {
-    CheckDailyAndWeeklyBoards();
-}, (minutes*60) * 1000);
+function boardTimer(){
+    console.log("seconds till midnight: " + moment("24:00:00", "hh:mm:ss").diff(moment(), 'seconds'));
+    console.log("days till next board: " + (7 - timedBoards.numDaysChecked));
+    setTimeout(() => {
+        CheckDailyAndWeeklyBoards,
+        moment("24:00:00", "hh:mm:ss").diff(moment(), 'seconds');
+    });
+}
 
 function CheckDailyAndWeeklyBoards(){
-    
+    var days = timedBoards.numDaysChecked++;
+    if(days >= 7){
+        timedBoards.weeklyBoard = generateRandomBoard()
+        timedBoards.numDaysChecked = 0
+    }
+    timedBoards.dailyBoard = generateRandomBoard()
+    boardTimer();
+    fs.writeFileSync(timedBoardsPathWithName, JSON.stringify(timedBoards, null, 2));
 }
 
 function checkPaths(){
@@ -211,6 +234,13 @@ var server = http.createServer(function (req, res){
         res.write(JSON.stringify(returnObj));  
         res.end();
     }
+    if(req.url == '/getDailyWeekly'){
+        var json = JSON.stringify(timedBoards)
+        console.log(json);
+        res.writeHead(200, {'Content-Type': 'application/json'});
+        res.write(json);  
+        res.end();
+    }
 });
 
 function writeLeaderBoardToFile(){
@@ -281,7 +311,7 @@ function getTestBoard(){
     return board;
 }
 
-function generateRandomBoard(name){
+function generateRandomBoard(author, name){
     var tilesDim = Math.round((Math.random()*7)+3);
     var goalAmt = Math.round((Math.random()+tilesDim)+3);
 
@@ -296,15 +326,20 @@ function generateRandomBoard(name){
     }
     for(var i = 0; i < goalAmt; i++){
         var pos = new Vector2(Math.round(Math.random()*(tilesDim-1)), Math.round(Math.random()*(tilesDim-1)))
-
         goalPositions[i] = pos;
-        usedGoalPositions[i] = pos;
-
     }
-
+    goalPositions = [...new Set(goalPositions)]
+    goalAmt = goalPositions.length;
     
-    board = new BoardData("TestAuthor",makeid(), formattedDate(), name, tileTypes, rotDirs, goalPositions, goalAmt, 1, 1, Math.round(Math.random()*2), Math.round(Math.random()*3), 0);
+    board = new BoardData(author,makeid(), formattedDate(), name, tileTypes, rotDirs, goalPositions, goalAmt, 1, 1, Math.round(Math.random()*2), Math.round(Math.random()*3), 0);
     return board;
+}
+
+function arrayRemove(arr, value) { 
+    
+    return arr.filter(function(ele){ 
+        return ele != value; 
+    });
 }
 
 function AddBoard(board, writeToFile){
