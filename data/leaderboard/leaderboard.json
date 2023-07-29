@@ -1,0 +1,72 @@
+{
+  "dataType": "Map",
+  "value": [
+    [
+      "8qmVD1yiif",
+      {
+        "elements": {
+          "dataType": "Map",
+          "value": [
+            [
+              "mgstauff",
+              {
+                "boardId": "8qmVD1yiif",
+                "playerName": "mgstauff",
+                "playtime": 175,
+                "date": "12/26/2022 06:09 PM",
+                "numTurns": 29
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    [
+      "1Ug9b4Tn2H",
+      {
+        "elements": {
+          "dataType": "Map",
+          "value": []
+        }
+      }
+    ],
+    [
+      "UWSHPaSKvW",
+      {
+        "elements": {
+          "dataType": "Map",
+          "value": []
+        }
+      }
+    ],
+    [
+      "B4pUxscLWE",
+      {
+        "elements": {
+          "dataType": "Map",
+          "value": []
+        }
+      }
+    ],
+    [
+      "Sug5MJfLRd",
+      {
+        "elements": {
+          "dataType": "Map",
+          "value": [
+            [
+              "mgstauff",
+              {
+                "boardId": "Sug5MJfLRd",
+                "playerName": "mgstauff",
+                "playtime": 6,
+                "date": "12/26/2022 06:11 PM",
+                "numTurns": 2
+              }
+            ]
+          ]
+        }
+      }
+    ]
+  ]
+}
